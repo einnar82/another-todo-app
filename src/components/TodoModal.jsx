@@ -1,7 +1,10 @@
 import React from 'react';
-import { Button, TextInput, Textarea, Modal, Label, Tooltip } from 'flowbite-react';
+import { Button, TextInput, Textarea, Modal, Tooltip } from 'flowbite-react';
+import { useTodos } from '../contexts/TodoContext';
 
-const TodoModal = ({ show, onClose, onSubmit, title, setTitle, description, setDescription, labels, setLabels, errors, editId }) => {
+const TodoModal = ({ show, onClose, onSubmit }) => {
+  const { title, setTitle, description, setDescription, labels, setLabels, errors, editId } = useTodos();
+
   return (
     <Modal show={show} onClose={onClose}>
       <Modal.Header>
