@@ -57,7 +57,15 @@ const App = () => {
   };
 
   const handleDeleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+    setTodos(prevTodos => {
+      const updatedTodos = prevTodos.filter(todo => todo.id !== id);
+      return updatedTodos;
+    });
+
+    // Reset filter if no notes left after deletion
+    if (!todos.some(todo => todo.labels.includes(filterLabel))) {
+      setFilterLabel('');
+    }
   };
 
   const handleEditTodo = (id) => {
