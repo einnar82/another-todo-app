@@ -33,6 +33,11 @@ const App = () => {
     return labels.split(/[ ,]+/).map(label => label.trim()).filter(label => label).join(', ');
   };
 
+  const formatDate = (date) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+  };
+
   const handleAddTodo = () => {
     const validationErrors = validateFields();
     if (Object.keys(validationErrors).length > 0) {
@@ -42,7 +47,8 @@ const App = () => {
 
     const formattedLabels = formatLabels(labels);
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    setTodos([...todos, { id: Date.now(), title, description, labels: formattedLabels, color: randomColor, completed: false }]);
+    const currentDate = formatDate(new Date());
+    setTodos([...todos, { id: Date.now(), title, description, labels: formattedLabels, date: currentDate, color: randomColor, completed: false }]);
     setTitle('');
     setDescription('');
     setLabels('');
@@ -204,6 +210,7 @@ const App = () => {
               <div className="pt-8">
                 <h3 className={`text-lg font-bold ${todo.completed ? 'line-through' : ''} break-words`}>{todo.title}</h3>
                 <p className={`text-sm ${todo.completed ? 'line-through' : ''} break-words`}>{todo.description}</p>
+                <p className={`text-sm text-gray-500 ${todo.completed ? 'line-through' : ''}`}>{todo.date}</p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   {todo.labels.split(',').map((label, index) => (
                     <span key={index} className={`text-gray-500 ${todo.completed ? 'line-through' : ''} break-words`}>#{label.trim()}</span>
