@@ -7,21 +7,47 @@ const App = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [labels, setLabels] = useState('');
+  const [color, setColor] = useState('#ffffff');
   const [editId, setEditId] = useState(null);
   const [filterLabel, setFilterLabel] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const colors = ['bg-yellow-100', 'bg-blue-100', 'bg-green-100', 'bg-pink-100', 'bg-purple-100', 'bg-red-100'];
 
-  const handleAddTodo = () => {
-    if (title.trim() && description.trim()) {
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      setTodos([...todos, { id: Date.now(), title, description, labels, color: randomColor, completed: false }]);
-      setTitle('');
-      setDescription('');
-      setLabels('');
-      setShowModal(false);
+  const validateFields = () => {
+    const errors = {};
+    if (!title.trim()) {
+      errors.title = 'Title is required';
     }
+    if (!description.trim()) {
+      errors.description = 'Description is required';
+    }
+    if (!labels.trim()) {
+      errors.labels = 'Labels are required';
+    }
+    return errors;
+  };
+
+  const formatLabels = (labels) => {
+    return labels.split(/[ ,]+/).map(label => label.trim()).filter(label => label).join(', ');
+  };
+
+  const handleAddTodo = () => {
+    const validationErrors = validateFields();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    const formattedLabels = formatLabels(labels);
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    setTodos([...todos, { id: Date.now(), title, description, labels: formattedLabels, color: randomColor, completed: false }]);
+    setTitle('');
+    setDescription('');
+    setLabels('');
+    setShowModal(false);
+    setErrors({});
   };
 
   const handleDeleteTodo = (id) => {
@@ -33,19 +59,28 @@ const App = () => {
     setTitle(todo.title);
     setDescription(todo.description);
     setLabels(todo.labels);
+    setColor(todo.color);
     setEditId(id);
     setShowModal(true);
   };
 
   const handleUpdateTodo = () => {
+    const validationErrors = validateFields();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    const formattedLabels = formatLabels(labels);
     setTodos(todos.map(todo => 
-      todo.id === editId ? { ...todo, title, description, labels } : todo
+      todo.id === editId ? { ...todo, title, description, labels: formattedLabels, color } : todo
     ));
     setTitle('');
     setDescription('');
     setLabels('');
     setEditId(null);
     setShowModal(false);
+    setErrors({});
   };
 
   const toggleComplete = (id) => {
@@ -62,13 +97,16 @@ const App = () => {
     setTitle('');
     setDescription('');
     setLabels('');
+    setColor('#ffffff');
     setEditId(null);
     setShowModal(true);
+    setErrors({});
   };
 
   const closeModal = () => {
     setShowModal(false);
     setEditId(null);
+    setErrors({});
   };
 
   return (
@@ -109,18 +147,22 @@ const App = () => {
                 onChange={(e) => setTitle(e.target.value)}
                 className="mb-2"
               />
+              {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
               <Textarea
                 placeholder="Description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="mb-2"
               />
+              {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
               <TextInput
-                placeholder="Labels (comma separated)"
+                placeholder="Labels (comma or space separated)"
                 value={labels}
                 onChange={(e) => setLabels(e.target.value)}
                 className="mb-2"
               />
+              {errors.labels && <p className="text-red-500 text-sm">{errors.labels}</p>}
+              <p className="text-gray-500 text-sm">Enter labels separated by commas or spaces (e.g., work personal urgent)</p>
             </div>
           </Modal.Body>
           <Modal.Footer>
