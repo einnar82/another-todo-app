@@ -82,7 +82,7 @@ export const TodoProvider = ({ children }) => {
       setTodos([...todos, response.data.data]);
       setTitle('');
       setDescription('');
-      setLabels('');
+      setLabels([]);
       setShowModal(false);
       setErrors({});
     } catch (error) {

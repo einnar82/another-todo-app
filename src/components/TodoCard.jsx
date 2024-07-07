@@ -5,8 +5,7 @@ import { useTodos } from '../contexts/TodoContext';
 
 const TodoCard = ({ todo }) => {
   const { toggleComplete, handleEditTodo, handleDeleteTodo } = useTodos();
-  console.log(todo)
-  const completedAt = todo.completed_at !== null;
+  const completedAt = todo.completed_at !== null
 
   return (
     <Card className={`relative ${todo.color}`}>
