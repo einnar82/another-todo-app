@@ -106,15 +106,15 @@ export const TodoProvider = ({ children }) => {
   const handleDeleteTodo = async (id) => {
     try {
       await api.delete(`/tasks/${id}`);
-      fetchTodos(filterLabel);
-      fetchUniqueLabels(); // Refresh unique labels
+      const updatedTodos = todos.filter(todo => todo.id !== id);
+      setTodos(updatedTodos);
 
-      // Reset filter if no notes left after deletion
-      if (!todos.some(todo => todo.labels.includes(filterLabel))) {
-        setFilterLabel('');
+      if (updatedTodos.length === 0) {
+        setFilterLabel(''); // Reset filter label to 'All' if no tasks remain
       }
 
-      fetchTodos(filterLabel);
+      // fetchTodos(filterLabel);
+      fetchUniqueLabels(); // Refresh unique label
     } catch (error) {
       console.error('Error deleting todo:', error);
     }
