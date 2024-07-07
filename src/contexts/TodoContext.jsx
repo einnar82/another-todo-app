@@ -180,10 +180,10 @@ export const TodoProvider = ({ children }) => {
   };
 
 
-  const uniqueLabels = [...new Set(todos.flatMap(todo => {
+  const uniqueLabels = useMemo(() => [...new Set(todos.flatMap(todo => {
     let labels = todo.labels ?? [];
     return labels.map(label => label.trim())
-  }))];
+  }))], [todos]);
 
 
   const value = useMemo(() => ({
