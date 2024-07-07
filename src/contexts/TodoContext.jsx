@@ -27,7 +27,7 @@ export const TodoProvider = ({ children }) => {
   const [showModal, setShowModal] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [hasMorePages, setHasMorePages] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
 
   const colors = useMemo(() => [
     "bg-yellow-100",
@@ -56,8 +56,8 @@ export const TodoProvider = ({ children }) => {
             };
       const response = await api.get("/tasks", params);
       setTodos(response.data.data);
-      setCurrentPage(response.data.currentPage);
-      setHasMorePages(response.data.hasMorePages);
+      setCurrentPage(response.data.meta.current_page);
+      setTotalPages(response.data.meta.last_page);
     } catch (error) {
       console.error("Error fetching todos:", error);
     }
@@ -241,6 +241,7 @@ export const TodoProvider = ({ children }) => {
   const value = useMemo(
     () => ({
       currentPage,
+      totalPages,
       todos,
       title,
       description,
@@ -252,7 +253,6 @@ export const TodoProvider = ({ children }) => {
       showModal,
       errors,
       uniqueLabels,
-      hasMorePages,
       setCurrentPage,
       setTitle,
       setDescription,
@@ -283,7 +283,7 @@ export const TodoProvider = ({ children }) => {
       colors,
       uniqueLabels,
       currentPage,
-      hasMorePages
+      totalPages,
     ]
   );
 

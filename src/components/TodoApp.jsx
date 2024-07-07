@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Select, Label, Tooltip } from 'flowbite-react';
+import { Button, Select, Label, Tooltip, Pagination } from 'flowbite-react';
 import TodoModal from './TodoModal';
 import TodoCard from './TodoCard';
 import { useTodos } from '../contexts/TodoContext';
@@ -11,7 +11,7 @@ const TodoApp = () => {
     filterLabel,
     currentPage,
     uniqueLabels,
-    hasMorePages,
+    totalPages,
     setCurrentPage,
     showModal,
     setErrors,
@@ -91,20 +91,8 @@ const TodoApp = () => {
             />
           ))}
         </div>
-        <div className="flex justify-between items-center mt-6">
-          <Button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <span>{`Page ${currentPage}`}</span>
-          <Button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={!hasMorePages}
-          >
-            Next
-          </Button>
+        <div className="flex justify-center items-center mt-6">
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} showIcons />
         </div>
       </div>
     </div>
