@@ -4,7 +4,7 @@ import { useTodos } from '../contexts/TodoContext';
 
 const TodoModal = ({ show, onClose, onSubmit }) => {
   const { title, setTitle, description, setDescription, labels, setLabels, errors, editId } = useTodos();
-
+  console.log(labels)
   return (
     <Modal show={show} onClose={onClose}>
       <Modal.Header>
@@ -27,13 +27,13 @@ const TodoModal = ({ show, onClose, onSubmit }) => {
           />
           {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
           <TextInput
-            placeholder="Labels (comma or space separated)"
+            placeholder="Labels (space separated)"
             value={labels}
             onChange={(e) => setLabels(e.target.value)}
             className="mb-2"
           />
           {errors.labels && <p className="text-red-500 text-sm">{errors.labels}</p>}
-          <p className="text-gray-500 text-sm">Enter labels separated by commas or spaces (e.g., work personal urgent)</p>
+          <p className="text-gray-500 text-sm">Enter labels separated by spaces (e.g., work personal urgent)</p>
         </div>
       </Modal.Body>
       <Modal.Footer>

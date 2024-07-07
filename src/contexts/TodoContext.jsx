@@ -12,7 +12,7 @@ export const TodoProvider = ({ children }) => {
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [labels, setLabels] = useState([]);
+  const [labels, setLabels] = useState('');
   const [color, setColor] = useState('#ffffff');
   const [editId, setEditId] = useState(null);
   const [filterLabel, setFilterLabel] = useState('');
@@ -64,7 +64,6 @@ export const TodoProvider = ({ children }) => {
       setErrors(validationErrors);
       return;
     }
-    console.log(labels)
     const formattedLabels = formatLabels(labels);
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     const currentDate = formatDate(new Date());
@@ -82,7 +81,7 @@ export const TodoProvider = ({ children }) => {
       setTodos([...todos, response.data.data]);
       setTitle('');
       setDescription('');
-      setLabels([]);
+      setLabels('');
       setShowModal(false);
       setErrors({});
     } catch (error) {
@@ -107,14 +106,19 @@ export const TodoProvider = ({ children }) => {
     }
   };
 
-  const handleEditTodo = (id) => {
-    const todo = todos.find(todo => todo.id === id);
-    setTitle(todo.title);
-    setDescription(todo.description);
-    setLabels(todo.labels);
-    setColor(todo.color);
-    setEditId(id);
-    setShowModal(true);
+  const handleEditTodo = async (id) => {
+    try {
+      const response = await api.get(`/tasks/${id}`);
+      const todo = response.data.data;
+      setTitle(todo.title);
+      setDescription(todo.description);
+      setLabels(todo.labels.join(" "));
+      setColor(todo.color);
+      setEditId(id);
+      setShowModal(true);
+    } catch (error) {
+      console.error('Error getting todo:', error);
+    }
   };
 
   const handleUpdateTodo = async () => {
@@ -124,7 +128,7 @@ export const TodoProvider = ({ children }) => {
       return;
     }
 
-    const formattedLabels = formatLabels(labels.join(','));
+    const formattedLabels = formatLabels(labels);
 
     try {
       const response = await api.put(`/tasks/${editId}`, {
@@ -166,7 +170,7 @@ export const TodoProvider = ({ children }) => {
     }
   };
 
-  const value = {
+  const value = useMemo(() => ({
     todos,
     title,
     description,
@@ -192,7 +196,8 @@ export const TodoProvider = ({ children }) => {
     colors,
     formatLabels,
     formatDate,
-  };
+  }), [todos, title, description, labels, color, editId, filterLabel, showModal, errors, colors]);
+
 
   return (
     <TodoContext.Provider value={value}>
