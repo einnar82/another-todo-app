@@ -26,15 +26,9 @@ const TodoApp = () => {
     handleDeleteTodo,
     toggleComplete,
     colors,
+    uniqueLabels
   } = useTodos();
-
-  const filteredTodos = filterLabel ? todos.filter(todo => todo.labels.includes(filterLabel)) : todos;
-
-  const uniqueLabels = [...new Set(todos.flatMap(todo => {
-    let labels = todo.labels ?? [];
-    return labels.map(label => label.trim())
-  }))];
-
+ 
   const openModal = () => {
     setTitle('');
     setDescription('');
@@ -46,6 +40,10 @@ const TodoApp = () => {
   const closeModal = () => {
     setShowModal(false);
     setErrors({});
+  };
+
+  const handleFilterChange = (value) => {
+    setFilterLabel(value);
   };
 
   return (
@@ -60,11 +58,11 @@ const TodoApp = () => {
             <Select
               id="filter"
               value={filterLabel}
-              onChange={(e) => setFilterLabel(e.target.value)}
+              onChange={(e) => handleFilterChange(e.target.value)}
               placeholder="Filter by label"
               className="w-full"
             >
-              <option value="">#All</option>
+              <option value="">All</option>
               {uniqueLabels.map((label, index) => (
                 <option key={index} value={label}>#{label}</option>
               ))}
@@ -80,7 +78,7 @@ const TodoApp = () => {
           onSubmit={editId ? handleUpdateTodo : handleAddTodo}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredTodos.map((todo, index) => (
+          {todos.map((todo, index) => (
             <TodoCard
               key={index}
               todo={todo}
@@ -95,4 +93,4 @@ const TodoApp = () => {
   );
 };
 
-export default TodoApp;
+export default React.memo(TodoApp);

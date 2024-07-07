@@ -4,7 +4,7 @@ import { useTodos } from '../contexts/TodoContext';
 
 const TodoModal = ({ show, onClose, onSubmit }) => {
   const { title, setTitle, description, setDescription, labels, setLabels, errors, editId } = useTodos();
-  console.log(labels)
+
   return (
     <Modal show={show} onClose={onClose}>
       <Modal.Header>

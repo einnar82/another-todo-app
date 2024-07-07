@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import api from './../api/index';
 import { data } from 'autoprefixer';
+import { debounce } from '../utils';
 
 const TodoContext = createContext();
 
@@ -21,18 +22,26 @@ export const TodoProvider = ({ children }) => {
 
   const colors = useMemo(() => ['bg-yellow-100', 'bg-blue-100', 'bg-green-100', 'bg-pink-100', 'bg-purple-100', 'bg-red-100']);
 
-  useEffect(() => {
-    fetchTodos();
-  }, []);
-
-  const fetchTodos = async () => {
+  const fetchTodos = async (filterLabel) => {
     try {
-      const response = await api.get('/tasks');
+      const params = filterLabel !== '' ?
+      {
+        params: {
+          label: filterLabel
+        }
+      } : {}
+      const response = await api.get('/tasks', params);
       setTodos(response.data.data);
     } catch (error) {
       console.error('Error fetching todos:', error);
     }
   };
+
+  const debouncedFetchTodos = useCallback(debounce(fetchTodos, 500), []);
+
+  useEffect(() => {
+    debouncedFetchTodos(filterLabel);
+  }, [filterLabel, debouncedFetchTodos]);
 
   const validateFields = () => {
     const errors = {};
@@ -101,6 +110,8 @@ export const TodoProvider = ({ children }) => {
       if (!todos.some(todo => todo.labels.includes(filterLabel))) {
         setFilterLabel('');
       }
+
+      fetchTodos(filterLabel);
     } catch (error) {
       console.error('Error deleting todo:', error);
     }
@@ -162,13 +173,18 @@ export const TodoProvider = ({ children }) => {
         completed_at: completedAt
       });
 
-      setTodos(todos.map(todo => 
-        todo.id === id ? response.data.data : todo
-      ));
+      fetchTodos(filterLabel);
     } catch (error) {
       console.error('Error toggling complete:', error);
     }
   };
+
+
+  const uniqueLabels = [...new Set(todos.flatMap(todo => {
+    let labels = todo.labels ?? [];
+    return labels.map(label => label.trim())
+  }))];
+
 
   const value = useMemo(() => ({
     todos,
@@ -176,10 +192,12 @@ export const TodoProvider = ({ children }) => {
     description,
     labels,
     color,
+    colors,
     editId,
     filterLabel,
     showModal,
     errors,
+    uniqueLabels,
     setTitle,
     setDescription,
     setLabels,
@@ -193,10 +211,9 @@ export const TodoProvider = ({ children }) => {
     handleEditTodo,
     handleUpdateTodo,
     toggleComplete,
-    colors,
     formatLabels,
     formatDate,
-  }), [todos, title, description, labels, color, editId, filterLabel, showModal, errors, colors]);
+  }), [todos, title, description, labels, color, editId, filterLabel, showModal, errors, colors, uniqueLabels]);
 
 
   return (
