@@ -9,6 +9,10 @@ const TodoApp = () => {
     todos,
     editId,
     filterLabel,
+    currentPage,
+    uniqueLabels,
+    hasMorePages,
+    setCurrentPage,
     showModal,
     setErrors,
     setTitle,
@@ -20,9 +24,7 @@ const TodoApp = () => {
     handleEditTodo,
     handleUpdateTodo,
     handleDeleteTodo,
-    toggleComplete,
-    colors,
-    uniqueLabels
+    toggleComplete
   } = useTodos();
  
   const openModal = () => {
@@ -41,6 +43,11 @@ const TodoApp = () => {
   const handleFilterChange = (value) => {
     setFilterLabel(value);
   };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   console.log('rendering')
   return (
     <div className="min-h-screen bg-gray-100 py-6">
@@ -83,6 +90,21 @@ const TodoApp = () => {
               onDelete={() => handleDeleteTodo(todo.id)}
             />
           ))}
+        </div>
+        <div className="flex justify-between items-center mt-6">
+          <Button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <span>{`Page ${currentPage}`}</span>
+          <Button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={!hasMorePages}
+          >
+            Next
+          </Button>
         </div>
       </div>
     </div>
