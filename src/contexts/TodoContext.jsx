@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import api from './../api/index';
-import { data } from 'autoprefixer';
 import { debounce } from '../utils';
 
 const TodoContext = createContext();
@@ -13,6 +12,7 @@ export const TodoProvider = ({ children }) => {
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [uniqueLabels, setUniqueLabels] = useState([]); 
   const [labels, setLabels] = useState('');
   const [color, setColor] = useState('#ffffff');
   const [editId, setEditId] = useState(null);
@@ -42,6 +42,10 @@ export const TodoProvider = ({ children }) => {
   useEffect(() => {
     debouncedFetchTodos(filterLabel);
   }, [filterLabel, debouncedFetchTodos]);
+
+  useEffect(() => {
+    fetchUniqueLabels();
+  }, []);
 
   const validateFields = () => {
     const errors = {};
@@ -87,7 +91,8 @@ export const TodoProvider = ({ children }) => {
         completed: false
       });
 
-      setTodos([...todos, response.data.data]);
+      fetchTodos(filterLabel);
+      fetchUniqueLabels(); // Refresh unique labels
       setTitle('');
       setDescription('');
       setLabels('');
@@ -101,10 +106,8 @@ export const TodoProvider = ({ children }) => {
   const handleDeleteTodo = async (id) => {
     try {
       await api.delete(`/tasks/${id}`);
-      setTodos(prevTodos => {
-        const updatedTodos = prevTodos.filter(todo => todo.id !== id);
-        return updatedTodos;
-      });
+      fetchTodos(filterLabel);
+      fetchUniqueLabels(); // Refresh unique labels
 
       // Reset filter if no notes left after deletion
       if (!todos.some(todo => todo.labels.includes(filterLabel))) {
@@ -149,9 +152,8 @@ export const TodoProvider = ({ children }) => {
         color
       });
 
-      setTodos(todos.map(todo => 
-        todo.id === editId ? response.data.data : todo
-      ));
+      fetchTodos(filterLabel);
+      fetchUniqueLabels(); // Refresh unique labels
       setTitle('');
       setDescription('');
       setLabels('');
@@ -174,16 +176,21 @@ export const TodoProvider = ({ children }) => {
       });
 
       fetchTodos(filterLabel);
+      fetchUniqueLabels(); // Refresh unique labels
     } catch (error) {
       console.error('Error toggling complete:', error);
     }
   };
 
 
-  const uniqueLabels = useMemo(() => [...new Set(todos.flatMap(todo => {
-    let labels = todo.labels ?? [];
-    return labels.map(label => label.trim())
-  }))], [todos]);
+  const fetchUniqueLabels = async () => {
+    try {
+      const response = await api.get('/labels');
+      setUniqueLabels(response.data);
+    } catch (error) {
+      console.error('Error fetching unique labels:', error);
+    }
+  };
 
 
   const value = useMemo(() => ({
