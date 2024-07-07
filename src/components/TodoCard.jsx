@@ -7,6 +7,22 @@ const TodoCard = ({ todo }) => {
   const { toggleComplete, handleEditTodo, handleDeleteTodo } = useTodos();
   const completedAt = todo.completed_at !== null
 
+  const formattedDate = (isoString) => {
+    const date = new Date(isoString);
+
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit',
+      timeZoneName: 'short'
+    };
+    
+    return date.toLocaleDateString('en-US', options);
+  }
+
   return (
     <Card className={`relative ${todo.color}`}>
       <div className="absolute top-2 left-2">
@@ -32,7 +48,7 @@ const TodoCard = ({ todo }) => {
         </Tooltip>
       </div>
       <div className="pt-8">
-        <p className="text-sm text-gray-500">{todo.created_at}</p>
+        <h5 className="text-xs text-gray-500">{formattedDate(todo.created_at)}</h5>
         <h3 className={`text-lg font-bold ${completedAt ? 'line-through' : ''} break-words`}>{todo.title}</h3>
         <p className={`text-sm ${completedAt ? 'line-through' : ''} break-words`}>{todo.description}</p>
         <div className="flex flex-wrap gap-1 mt-2">
