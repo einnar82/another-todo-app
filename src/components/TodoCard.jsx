@@ -5,6 +5,8 @@ import { useTodos } from '../contexts/TodoContext';
 
 const TodoCard = ({ todo }) => {
   const { toggleComplete, handleEditTodo, handleDeleteTodo } = useTodos();
+  console.log(todo)
+  const completedAt = todo.completed_at !== null;
 
   return (
     <Card className={`relative ${todo.color}`}>
@@ -12,7 +14,7 @@ const TodoCard = ({ todo }) => {
         <Tooltip content="Mark as complete">
           <input
             type="checkbox"
-            checked={todo.completed}
+            checked={completedAt}
             onChange={() => toggleComplete(todo.id)}
             className="mr-2"
           />
@@ -31,12 +33,12 @@ const TodoCard = ({ todo }) => {
         </Tooltip>
       </div>
       <div className="pt-8">
-        <p className="text-sm text-gray-500">{todo.date}</p>
-        <h3 className={`text-lg font-bold ${todo.completed ? 'line-through' : ''} break-words`}>{todo.title}</h3>
-        <p className={`text-sm ${todo.completed ? 'line-through' : ''} break-words`}>{todo.description}</p>
+        <p className="text-sm text-gray-500">{todo.created_at}</p>
+        <h3 className={`text-lg font-bold ${completedAt ? 'line-through' : ''} break-words`}>{todo.title}</h3>
+        <p className={`text-sm ${completedAt ? 'line-through' : ''} break-words`}>{todo.description}</p>
         <div className="flex flex-wrap gap-1 mt-2">
-          {todo.labels.split(',').map((label, index) => (
-            <span key={index} className={`text-gray-500 ${todo.completed ? 'line-through' : ''} break-words`}>#{label.trim()}</span>
+          {todo.labels.map((label, index) => (
+            <span key={index} className={`text-gray-500 ${completedAt ? 'line-through' : ''} break-words`}>#{label.trim()}</span>
           ))}
         </div>
       </div>

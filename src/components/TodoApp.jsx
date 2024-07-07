@@ -9,6 +9,7 @@ const TodoApp = () => {
     todos,
     title,
     description,
+    editId,
     labels,
     filterLabel,
     showModal,
@@ -25,12 +26,14 @@ const TodoApp = () => {
     handleDeleteTodo,
     toggleComplete,
     colors,
-    editId
   } = useTodos();
 
   const filteredTodos = filterLabel ? todos.filter(todo => todo.labels.includes(filterLabel)) : todos;
 
-  const uniqueLabels = [...new Set(todos.flatMap(todo => todo.labels.split(',').map(label => label.trim())))];
+  const uniqueLabels = [...new Set(todos.flatMap(todo => {
+    let labels = todo.labels ?? [];
+    return labels.map(label => label.trim())
+  }))];
 
   const openModal = () => {
     setTitle('');
@@ -75,23 +78,15 @@ const TodoApp = () => {
           show={showModal}
           onClose={closeModal}
           onSubmit={editId ? handleUpdateTodo : handleAddTodo}
-          title={title}
-          setTitle={setTitle}
-          description={description}
-          setDescription={setDescription}
-          labels={labels}
-          setLabels={setLabels}
-          errors={errors}
-          editId={editId}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredTodos.map(todo => (
+          {filteredTodos.map((todo, index) => (
             <TodoCard
-              key={todo.id}
+              key={index}
               todo={todo}
-              onToggleComplete={toggleComplete}
-              onEdit={handleEditTodo}
-              onDelete={handleDeleteTodo}
+              onToggleComplete={() => toggleComplete(todo.id)}
+              onEdit={() => handleEditTodo(todo.id)}
+              onDelete={() => handleDeleteTodo(todo.id)}
             />
           ))}
         </div>
