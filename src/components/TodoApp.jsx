@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Button, Select, Label, Tooltip, Pagination } from 'flowbite-react';
 import TodoModal from './TodoModal';
 import TodoCard from './TodoCard';
@@ -27,18 +27,18 @@ const TodoApp = () => {
     toggleComplete
   } = useTodos();
  
-  const openModal = () => {
+  const openModal = useCallback(() => {
     setTitle('');
     setDescription('');
     setLabels('');
     setShowModal(true);
     setErrors({});
-  };
+  }, [setShowModal]);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setShowModal(false);
     setErrors({});
-  };
+  }, [setShowModal]);
 
   const handleFilterChange = (value) => {
     setFilterLabel(value);

@@ -38,7 +38,7 @@ export const TodoProvider = ({ children }) => {
     "bg-red-100",
   ]);
 
-  const fetchTodos = async (filterLabel, page = 1) => {
+  const fetchTodos = useCallback(async (filterLabel, page = 1) => {
     const defaultParams = {
       page,
     };
@@ -61,9 +61,20 @@ export const TodoProvider = ({ children }) => {
     } catch (error) {
       console.error("Error fetching todos:", error);
     }
-  };
+  }, []);
 
-  const debouncedFetchTodos = useCallback(debounce(fetchTodos, 500), []);
+  const fetchUniqueLabels = useCallback(async () => {
+    try {
+      const response = await api.get("/labels");
+      setUniqueLabels(response.data);
+    } catch (error) {
+      console.error("Error fetching unique labels:", error);
+    }
+  }, []);
+
+  const debouncedFetchTodos = useCallback(debounce(fetchTodos, 500), [
+    fetchTodos,
+  ]);
 
   useEffect(() => {
     debouncedFetchTodos(filterLabel, currentPage);
@@ -71,9 +82,9 @@ export const TodoProvider = ({ children }) => {
 
   useEffect(() => {
     fetchUniqueLabels();
-  }, []);
+  }, [fetchUniqueLabels]);
 
-  const validateFields = () => {
+  const validateFields = useCallback(() => {
     const errors = {};
     if (!title.trim()) {
       errors.title = "Title is required";
@@ -86,16 +97,16 @@ export const TodoProvider = ({ children }) => {
       errors.labels = "Labels are required";
     }
     return errors;
-  };
+  }, [title, description, labels]);
 
-  const formatLabels = (labels) => {
+  const formatLabels = useCallback((labels) => {
     return labels
       .split(/[ ,]+/)
       .map((label) => label.trim())
       .filter((label) => label);
-  };
+  }, []);
 
-  const formatDate = (date) => {
+  const formatDate = useCallback((date) => {
     const options = {
       year: "numeric",
       month: "long",
@@ -104,9 +115,9 @@ export const TodoProvider = ({ children }) => {
       minute: "numeric",
     };
     return new Intl.DateTimeFormat("en-US", options).format(date);
-  };
+  }, []);
 
-  const handleAddTodo = async () => {
+  const handleAddTodo = useCallback(async () => {
     const validationErrors = validateFields();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -136,45 +147,62 @@ export const TodoProvider = ({ children }) => {
     } catch (error) {
       console.error("Error adding todo:", error);
     }
-  };
+  }, [
+    title,
+    description,
+    labels,
+    colors,
+    formatLabels,
+    formatDate,
+    filterLabel,
+    currentPage,
+    fetchTodos,
+    fetchUniqueLabels,
+    validateFields,
+  ]);
 
-  const handleDeleteTodo = async (id) => {
-    try {
-      await api.delete(`/tasks/${id}`);
-      const updatedTodos = todos.filter((todo) => todo.id !== id);
-      setTodos(updatedTodos);
+  const handleDeleteTodo = useCallback(
+    async (id) => {
+      try {
+        await api.delete(`/tasks/${id}`);
+        const updatedTodos = todos.filter((todo) => todo.id !== id);
+        setTodos(updatedTodos);
 
-      if (updatedTodos.length === 0) {
-        setFilterLabel(""); // Reset filter label to 'All' if no tasks remain
+        if (updatedTodos.length === 0) {
+          setFilterLabel(""); // Reset filter label to 'All' if no tasks remain
+        }
+
+        if (currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+        }
+
+        fetchUniqueLabels(); // Refresh unique label
+      } catch (error) {
+        console.error("Error deleting todo:", error);
       }
+    },
+    [todos, currentPage, fetchUniqueLabels]
+  );
 
-      if (currentPage > 1) {
-        setCurrentPage(currentPage - 1);
+  const handleEditTodo = useCallback(
+    async (id) => {
+      try {
+        const response = await api.get(`/tasks/${id}`);
+        const todo = response.data.data;
+        setTitle(todo.title);
+        setDescription(todo.description);
+        setLabels(todo.labels.join(" "));
+        setColor(todo.color);
+        setEditId(id);
+        setShowModal(true);
+      } catch (error) {
+        console.error("Error getting todo:", error);
       }
+    },
+    [todos]
+  );
 
-      // fetchTodos(filterLabel);
-      fetchUniqueLabels(); // Refresh unique label
-    } catch (error) {
-      console.error("Error deleting todo:", error);
-    }
-  };
-
-  const handleEditTodo = async (id) => {
-    try {
-      const response = await api.get(`/tasks/${id}`);
-      const todo = response.data.data;
-      setTitle(todo.title);
-      setDescription(todo.description);
-      setLabels(todo.labels.join(" "));
-      setColor(todo.color);
-      setEditId(id);
-      setShowModal(true);
-    } catch (error) {
-      console.error("Error getting todo:", error);
-    }
-  };
-
-  const handleUpdateTodo = async () => {
+  const handleUpdateTodo = useCallback(async () => {
     const validationErrors = validateFields();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -202,9 +230,21 @@ export const TodoProvider = ({ children }) => {
     } catch (error) {
       console.error("Error updating todo:", error);
     }
-  };
+  }, [
+    title,
+    description,
+    labels,
+    color,
+    editId,
+    formatLabels,
+    filterLabel,
+    currentPage,
+    fetchTodos,
+    fetchUniqueLabels,
+    validateFields,
+  ]);
 
-  const toggleComplete = async (id) => {
+  const toggleComplete = useCallback(async (id) => {
     const todo = todos.find((todo) => todo.id === id);
     const date = new Date();
     const completedAt =
@@ -222,21 +262,12 @@ export const TodoProvider = ({ children }) => {
     } catch (error) {
       console.error("Error toggling complete:", error);
     }
-  };
+  }, [todos, filterLabel, currentPage, fetchTodos, fetchUniqueLabels]);
 
-  const fetchUniqueLabels = async () => {
-    try {
-      const response = await api.get("/labels");
-      setUniqueLabels(response.data);
-    } catch (error) {
-      console.error("Error fetching unique labels:", error);
-    }
-  };
-
-  const handleFilterLabelChange = (label) => {
+  const handleFilterLabelChange = useCallback((label) => {
     setFilterLabel(label);
     setCurrentPage(1); // Reset page to 1 when filter changes
-  };
+  }, []);
 
   const value = useMemo(
     () => ({

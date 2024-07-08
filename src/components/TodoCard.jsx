@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { Card, Tooltip } from 'flowbite-react';
 import { useTodos } from '../contexts/TodoContext';
@@ -7,10 +7,10 @@ const TodoCard = ({ todo }) => {
   const { toggleComplete, handleEditTodo, handleDeleteTodo } = useTodos();
   const completedAt = todo.completed_at !== null
 
-  const formattedDate = (isoString) => {
+  const formattedDate = useCallback((isoString) => {
     const date = new Date(isoString);
 
-    const options = { 
+    const options = {
       year: 'numeric', 
       month: 'long', 
       day: 'numeric', 
@@ -21,7 +21,7 @@ const TodoCard = ({ todo }) => {
     };
     
     return date.toLocaleDateString('en-US', options);
-  }
+  }, [])
 
   return (
     <Card className={`relative ${todo.color}`}>
