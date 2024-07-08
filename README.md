@@ -1,8 +1,27 @@
-# React + Vite
+# Another Task App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Prerequisites for local setup:**
 
-Currently, two official plugins are available:
+- Node 18
+- Any text editor
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Instructions:**
+
+- Clone the project `git clone https://github.com/einnar82/another-todo-app`
+- Go to the project folder and run `npm install`
+- Create a new `.env` file. 
+- In your terminal type `npm run dev`
+- The project is running at `localhost:5173`.
+
+**Git commands used for this project.**
+
+- `git add`
+- `git commit`
+- `git push`
+- `git pull`
+- `git merge`
+- `git log`
+
+**Screenshots:**
+
+![./screenshots/video.mov](./screenshots/video.mov)
